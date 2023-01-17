@@ -1,0 +1,47 @@
+<!-- Подробная информация о посте -->
+{% extends "base.html" %}
+{% block title %} Детали поста {% endblock %}
+{% block content %}
+  <div class="row">
+    <aside class="col-12 col-md-3">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Дата публикации: {{ onepost.pub_date }}
+        </li>
+        <!-- Проверяем есть ли у поста группа-->
+        {% if onepost.group %}
+          <li class="list-group-item">
+            Группа: {{ onepost.group.title }}
+            <a href="{% url 'posts:group_list' onepost.group.slug %}">
+              все записи группы
+            </a>
+          </li>
+        {% else %}
+          <span style='color: red'>
+            Этой публикации нет ни в одном сообществе.
+          </span>
+        {% endif %}
+        <li class="list-group-item">
+          Автор: {{ onepost.author }}
+        </li>
+        <li class="list-group-item">
+          <!-- Ссылка на профиль автора поста -->
+          <a href="{% url 'posts:profile' onepost.author %}">
+            все посты пользователя
+          </a>
+        </li>
+      </ul>
+    </aside>
+    <article class="col-12 col-md-9">
+      <p>
+        {{ onepost.text }}
+      </p>
+    </article>
+    <!-- Проверка прав на редактирование поста  -->
+    {% if request.user == onepost.author %}
+      <a href="{% url 'posts:post_edit' onepost.id %}">
+        Редактировать пост
+      </a>
+    {% endif %}
+  </div>
+{% endblock %}
