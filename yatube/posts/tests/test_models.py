@@ -22,10 +22,9 @@ class PostModelTest(TestCase):
         )
 
     def test_models_have_correct_object_names(self):
-        check_str = Post()
-        self.assertEqual(str(check_str), check_str.__str__())
+        check_post = Post()
+        self.assertEqual(str(check_post), check_post.__str__())
 
     def test_group(self):
         check_group = Group()
         self.assertEqual(str(check_group), check_group.__str__())
-

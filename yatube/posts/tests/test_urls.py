@@ -50,7 +50,8 @@ class TaskURLTests(TestCase):
 
     def test_post_edit(self):
         """Страница /posts/<int:post_id>/edit/ доступна только автору поста."""
-        response = self.guest_client.get('/posts/<int:post_id>/edit/', follow=True)
+        response = self.guest_client.get('/posts/<int:post_id>/edit/',
+                                         follow=True)
         self.assertRedirects(
             response, '/posts/<int:post_id>/')
 

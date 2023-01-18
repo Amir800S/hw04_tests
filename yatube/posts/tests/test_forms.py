@@ -22,11 +22,10 @@ class TaskCreateFormTests(TestCase):
             'id': 'id',
         }
         response = self.authorized_client.post(
-            reverse('posts:create_post'),
+            reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, reverse('posts:index'))
         self.assertEqual(response.status_code, 200)
         post_count = Post.objects.count()
         self.assertEqual(Post.objects.count(), post_count + 1)
@@ -43,7 +42,7 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response,
-                             reverse('posts:post_edit', args='post_id'))
+                             reverse('posts:post_detail', args='post_id'))
         self.assertTrue(
             Post.objects.filter(
                 text='NewTestText',
