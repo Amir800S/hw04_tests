@@ -1,32 +1,24 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Post
-
-User = get_user_model()
+from .fixtures import models
 
 
 class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.author = User.objects.create_user(
-            username='TestUser',
-            first_name='Test',
-            last_name='User',
-            email='testmail@yahoo.com'
-        )
-        for i in range(1, 15):
-            cls.post = Post.object.create(
-                text='TestText',
-                author=User.objects.get(username='TestUser')
-            )
+        cls.user = models.user()
+        cls.group = models.group()
+        cls.post = models.post()
 
     def setUp(self):
-        self.user = User.objects.create_user(username='TestUser')
+        self.guest_client = Client()
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(PaginatorViewsTest.user)
+
+        for i in range(1, 15):
+            self.post()
 
     def test_first_page_contains_ten_records(self):
         response = self.client.get(reverse('posts:index'))
@@ -34,4 +26,6 @@ class PaginatorViewsTest(TestCase):
 
     def test_second_page_contains_five_records(self):
         response = self.client.get(reverse('posts:index') + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 5)
+        self.assertEqual(len(response.context['page_obj']), 4)
+
+

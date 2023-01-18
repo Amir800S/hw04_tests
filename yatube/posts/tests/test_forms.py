@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..models import Post
+from .fixtures import models
 
 User = get_user_model()
 
@@ -11,15 +12,21 @@ class TaskCreateFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.user = models.user()
+        cls.group = models.group()
+        cls.post = models.post()
 
     def setUp(self):
+        self.guest_client = Client()
         self.authorized_client = Client()
+        self.authorized_client.force_login(TaskCreateFormTests.user)
 
     def test_create_post(self):
+        post_count = Post.objects.count()
         form_data = {
             'text': 'TestText',
-            'author': 'TestUser',
-            'id': 'id',
+            'author': self.user.username,
+            'id': self.post.id,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -27,26 +34,27 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
-        post_count = Post.objects.count()
         self.assertEqual(Post.objects.count(), post_count + 1)
 
     def test_post_edit(self):
         form_data = {
             'text': 'NewTestText',
-            'author': 'TestAuthor',
-            'post_id': 'post_id',
+            'author': self.user.username,
+            'id': self.post.id,
         }
+        post_edit = Post.objects.get(id=form_data['id'])
         response = self.authorized_client.post(
-            reverse('posts:post_edit', args='post_id'),
+            reverse('posts:post_edit', kwargs={'post_id': post_edit}),
             data=form_data,
             follow=True
         )
         self.assertRedirects(response,
-                             reverse('posts:post_detail', args='post_id'))
+                             reverse('posts:post_detail',
+                                     kwargs={'post_id': post_edit}))
         self.assertTrue(
             Post.objects.filter(
                 text='NewTestText',
-                author='TestAuthor',
-                id='post_id'
+                author=self.user.username,
+                id=self.post.id,
             ).exists()
         )
