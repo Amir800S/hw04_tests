@@ -54,8 +54,7 @@ class TaskPagesTests(TestCase):
     def test_post_create_show_correct_context(self):
         """ Проверка Post Create"""
         response = self.authorized_client.get(reverse('posts:post_create'))
-        form = response.context['form']
-        self.assertTrue(form)
+        self.assertTrue(response.context['form'])
 
     def test_if_post_with_group_on_index(self):
         """ Проверка поста с группой на Index"""
