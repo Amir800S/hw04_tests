@@ -43,7 +43,7 @@ class TaskPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:post_detail', kwargs={'post_id': self.post.id}))
         first_object = response.context['onepost']
-        self.assertEqual(first_object.id, self.post.id)
+        self.assertEqual(first_object.id, self.post.id )
 
     def test_post_edit_show_correct_context(self):
         """ Проверка Post Edit"""
