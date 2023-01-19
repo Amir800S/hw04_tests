@@ -28,8 +28,7 @@ class TaskPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         first_object = response.context['page_obj'][0]
-        find_group = first_object.group
-        self.assertEqual(find_group, self.group)
+        self.assertEqual(first_object.group, self.group)
 
     def test_profile_show_correct_context(self):
         """ Проверка Profile"""
