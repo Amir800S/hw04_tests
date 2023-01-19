@@ -1,5 +1,4 @@
 from django.test import TestCase, Client
-from django.urls import reverse
 
 from .fixtures import models
 
@@ -55,12 +54,12 @@ class TaskURLTests(TestCase):
     def test_urls_uses_correct_template(self):
         """URL использует соответствующий шаблон."""
         templates_url_names = {
-            f'/': 'posts/index.html',
+            '/': 'posts/index.html',
             f'/group/{self.group.slug}/': 'posts/group_list.html',
             f'/profile/{self.user.username}/': 'posts/profile.html',
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
             f'/posts/{self.post.id}/edit/': 'posts/create_post.html',
-            f'/create/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):

@@ -29,4 +29,3 @@ class PostModelTest(TestCase):
     def test_group(self):
         check_group = Group()
         self.assertEqual(str(check_group), check_group.__str__())
-
