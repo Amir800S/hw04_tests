@@ -26,14 +26,15 @@ class TaskPagesTests(TestCase):
     def test_group_list_show_correct_context(self):
         """ Проверка Group List"""
         response = self.authorized_client.get(
-            reverse('posts:group_list', kwargs={'slug': 'TestSlug'}))
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.group, self.group)
+        find_group = first_object.group
+        self.assertEqual(find_group, self.group)
 
     def test_profile_show_correct_context(self):
         """ Проверка Profile"""
         response = self.authorized_client.get(
-            reverse('posts:profile', kwargs={'username': 'TestUser'}))
+            reverse('posts:profile', kwargs={'username': self.user.username}))
         first_object = response.context['page_obj'][0]
         self.assertEqual(first_object.author, self.user)
 
@@ -48,14 +49,35 @@ class TaskPagesTests(TestCase):
         """ Проверка Post Edit"""
         response = self.authorized_client.get(
             reverse('posts:post_edit', kwargs={'post_id': self.post.id}))
-        first_object = response.context['form']
-        self.assertEqual(first_object.id, 1)
+        first_object = response.context['post']
+        self.assertEqual(first_object.id, self.post.id)
 
     def test_post_create_show_correct_context(self):
         """ Проверка Post Create"""
         response = self.authorized_client.get(reverse('posts:post_create'))
         form = response.context['form']
         self.assertTrue(form)
+
+    def test_if_post_with_group_on_index(self):
+        """ Проверка поста с группой на Index"""
+        response = self.authorized_client.get(reverse('posts:index'))
+        if self.post.group:
+            self.assertIn(self.post, response.context['page_obj'])
+
+    def test_if_post_with_group_on_group_list(self):
+        """ Проверка поста с группой на Group List"""
+        response = self.authorized_client.get(
+            reverse('posts:group_list', kwargs={'slug': self.group.slug}))
+        if self.post.group:
+            self.assertIn(self.post, response.context['page_obj'])
+
+    def test_if_post_with_group_on_profile(self):
+        """ Проверка поста с группой на Profile"""
+        response = self.authorized_client.get(
+            reverse('posts:profile',
+                    kwargs={'username': self.user.username}))
+        if self.post.group:
+            self.assertIn(self.post, response.context['page_obj'])
 
     def test_pages_uses_correct_template(self):
         """ Проверка вызываемого шаблона """

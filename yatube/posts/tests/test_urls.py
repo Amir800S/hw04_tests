@@ -41,24 +41,26 @@ class TaskURLTests(TestCase):
         """Страница /posts/<int:post_id>/edit/ доступна только автору поста."""
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/',
                                               follow=True)
-        self.assertRedirects(
-            response, reverse('posts:post_detail',
-                              kwargs={'post_id': self.post.id}))
+        self.assertEqual(response.status_code, 200)
 
     def test_post_create(self):
         """Страница /create/ доступна авторизированному пользователю."""
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, 200)
 
+    def test_unexisting_page(self):
+        response = self.authorized_client.get('/unexisting_page/')
+        self.assertEqual(response.status_code, 404)
+
     def test_urls_uses_correct_template(self):
         """URL использует соответствующий шаблон."""
         templates_url_names = {
-            '/': 'posts/index.html',
+            f'/': 'posts/index.html',
             f'/group/{self.group.slug}/': 'posts/group_list.html',
-            f'/profile/{self.user.username}]/': 'posts/profile.html',
+            f'/profile/{self.user.username}/': 'posts/profile.html',
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
             f'/posts/{self.post.id}/edit/': 'posts/create_post.html',
-            '/create/': 'posts/create_post.html',
+            f'/create/': 'posts/create_post.html',
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):

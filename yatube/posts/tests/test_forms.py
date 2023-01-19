@@ -42,19 +42,18 @@ class TaskCreateFormTests(TestCase):
             'author': self.user.username,
             'id': self.post.id,
         }
-        post_edit = Post.objects.get(id=form_data['id'])
         response = self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': post_edit}),
+            reverse('posts:post_edit', args=(self.post.id, )),
             data=form_data,
             follow=True
         )
         self.assertRedirects(response,
                              reverse('posts:post_detail',
-                                     kwargs={'post_id': post_edit}))
+                                     args=(self.post.id, )))
         self.assertTrue(
             Post.objects.filter(
                 text='NewTestText',
-                author=self.user.username,
+                author=self.user,
                 id=self.post.id,
             ).exists()
         )

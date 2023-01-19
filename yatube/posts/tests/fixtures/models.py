@@ -23,3 +23,11 @@ def post():
         id=1,
         group=Group.objects.get(slug='TestSlug'),
     )
+
+
+def post_for_paginator():
+    return Post.objects.create(
+        author=User.objects.get(username='TestUser'),
+        text='TestText',
+        group=Group.objects.get(slug='TestSlug'),
+    )
