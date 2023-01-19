@@ -21,7 +21,7 @@ class TaskPagesTests(TestCase):
     def test_index_show_correct_context(self):
         """ Проверка Index"""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.assertTrue(response.context['page_obj'])
+        self.assertTrue(response.context['page_obj'].object_list)
 
     def test_group_list_show_correct_context(self):
         """ Проверка Group List"""
