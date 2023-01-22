@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -10,20 +11,31 @@ class PaginatorViewsTest(TestCase):
         super().setUpClass()
         cls.user = models.user()
         cls.group = models.group()
-        cls.post = models.post()
 
     def setUp(self):
-        self.guest_client = Client()
         self.authorized_client = Client()
-        self.authorized_client.force_login(PaginatorViewsTest.user)
+        self.authorized_client.force_login(self.user)
 
-        for i in range(1, 15):
-            models.post_for_paginator()
+        for objs in range(settings.POSTS_ON_MAIN + models.TEST_RANGE):
+            models.bulk_post()
 
-    def test_first_page_contains_ten_records(self):
-        response = self.client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context['page_obj']), 10)
-
-    def test_second_page_contains_five_records(self):
-        response = self.client.get(reverse('posts:index') + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 5)
+    def test_paginator(self):
+        """ Проверка Paginator """
+        adresses_and_args = (
+            ('posts:index',),
+            ('posts:group_list', self.group.slug),
+            ('posts:profile', self.user.username)
+        )
+        pages_for_test = (
+            (models.FIRST_PAGE, settings.POSTS_ON_MAIN),
+            (models.SECOND_PAGE, models.TEST_RANGE)
+        )
+        for name, *args in adresses_and_args[models.SKIP_WITHOUT_ARGS:]:
+            for page, count in pages_for_test:
+                with self.subTest(name=name, page=page):
+                    response = self.authorized_client.get(
+                        reverse(name, args=args), {'page': page}
+                    )
+                    self.assertEqual(
+                        len(response.context.get('page_obj').object_list), count
+                    )

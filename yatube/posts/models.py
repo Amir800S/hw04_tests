@@ -37,7 +37,7 @@ class Post(models.Model):
     class Meta:
         """ Отображение в админке """
         ordering = ('-pub_date',)
-        verbose_name_plural = 'Сортировка по дате публикации'
+        verbose_name_plural = 'Посты'
 
     def __str__(self):
         return self.text[0:15]
