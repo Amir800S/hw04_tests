@@ -25,15 +25,20 @@ class TaskURLTests(TestCase):
         """ Проверка Reverese == URL-адресу"""
         test_urls_with_reverse = (
             ('posts:index', None,  f'/'),
-            ('posts:group_list', (self.group.slug,), f'/group/{self.group.slug}/'),
-            ('posts:profile', (self.user.username,), f'/profile/{self.user.username}/'),
-            ('posts:post_detail', (self.post.id,), f'/posts/{self.post.id}/'),
-            ('posts:post_edit', (self.post.id,), f'/posts/{self.post.id}/edit/'),
+            ('posts:group_list', (self.group.slug, ),
+             f'/group/{self.group.slug}/'),
+            ('posts:profile', (self.user.username,),
+             f'/profile/{self.user.username}/'),
+            ('posts:post_detail', (self.post.id,),
+             f'/posts/{self.post.id}/'),
+            ('posts:post_edit', (self.post.id,),
+             f'/posts/{self.post.id}/edit/'),
             ('posts:post_create', None, f'/create/')
         )
         for name, args, url in test_urls_with_reverse:  # Авторизированный автор
             with self.subTest(name=name, args=args, url=url):
-                response = self.authorized_client.get(reverse(name, args=args))
+                response = self.authorized_client.get(
+                    reverse(name, args=args))
                 self.assertTrue(response.status_code, HTTPStatus.OK)
                 self.assertEqual(reverse(name, args=args), url)  # Reverse == URL
 
@@ -73,7 +78,8 @@ class TaskURLTests(TestCase):
                     args=args,
                     template=template
             ):
-                response = self.authorized_client.get(reverse(rev_name, args=args))
+                response = self.authorized_client.get(
+                    reverse(rev_name, args=args))
                 self.assertTemplateUsed(response, template)
 
     def test_unexisting_page(self):

@@ -50,7 +50,7 @@ class TaskPagesTests(TestCase):
     def test_group_list_show_correct_context(self):
         """ Проверка Group List"""
         self.what_is_in_context(
-            reverse('posts:group_list', args=(self.group.slug, )))
+            reverse('posts:group_list', args=(self.group.slug,)))
 
     def test_profile_show_correct_context(self):
         """ Проверка Profile"""
@@ -70,7 +70,8 @@ class TaskPagesTests(TestCase):
         )
         for rev_name, args in edit_and_create_test:
             with self.subTest(rev_name=rev_name, args=args):
-                response = self.authorized_client.get(reverse(rev_name, args=args))
+                response = self.authorized_client.get(
+                    reverse(rev_name, args=args))
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], PostForm)
         for form_field in response.context['form'].fields:
@@ -81,12 +82,10 @@ class TaskPagesTests(TestCase):
     def test_in_intended_group(self):
         """ Тест пост попал в нужную группу """
         response = self.authorized_client.get(
-            reverse('posts:group_list', args=(self.second_group.slug, )))
+            reverse('posts:group_list', args=(self.second_group.slug,)))
         self.assertEqual(len(response.context.get('page_obj').object_list), 0)
         self.assertTrue(Post.objects.latest('id').group)
         response_to_group = self.authorized_client.get(
             reverse('posts:group_list', args=(self.group.slug,)))
         self.assertIn(Post.objects.latest('id'),
                       response_to_group.context['page_obj'].object_list)
-
-
