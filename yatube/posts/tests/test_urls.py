@@ -24,7 +24,7 @@ class TaskURLTests(TestCase):
     def test_urls_with_reverse(self):
         """ Проверка Reverese == URL-адресу"""
         test_urls_with_reverse = (
-            ('posts:index', None,  f'/'),
+            ('posts:index', None, '/'),
             ('posts:group_list', (self.group.slug, ),
              f'/group/{self.group.slug}/'),
             ('posts:profile', (self.user.username,),
@@ -33,16 +33,18 @@ class TaskURLTests(TestCase):
              f'/posts/{self.post.id}/'),
             ('posts:post_edit', (self.post.id,),
              f'/posts/{self.post.id}/edit/'),
-            ('posts:post_create', None, f'/create/')
+            ('posts:post_create', None, '/create/')
         )
-        for name, args, url in test_urls_with_reverse:  # Авторизированный автор
+        # Авторизированный автор
+        for name, args, url in test_urls_with_reverse:
             with self.subTest(name=name, args=args, url=url):
                 response = self.authorized_client.get(
                     reverse(name, args=args))
                 self.assertTrue(response.status_code, HTTPStatus.OK)
-                self.assertEqual(reverse(name, args=args), url)  # Reverse == URL
+                self.assertEqual(reverse(name, args=args), url)
 
-        for name, args, url in test_urls_with_reverse:  # Авторизированный не автор
+        # Авторизированный не автор
+        for name, args, url in test_urls_with_reverse:
             with self.subTest(name=name, args=args, url=url):
                 response = self.second_authorized_client.get(
                     reverse(name, args=args))
@@ -51,7 +53,8 @@ class TaskURLTests(TestCase):
                 else:
                     self.assertTrue(response.status_code, HTTPStatus.OK)
 
-        for name, args, url in test_urls_with_reverse:  # Неавторизированный
+        # Неавторизированный
+        for name, args, url in test_urls_with_reverse:
             with self.subTest(name=name, args=args, url=url):
                 response = self.client.get(reverse(name, args=args))
                 if name == 'posts:post_edit':

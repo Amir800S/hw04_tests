@@ -37,5 +37,5 @@ class PaginatorViewsTest(TestCase):
                         reverse(name, args=args), {'page': page}
                     )
                     self.assertEqual(
-                        len(response.context.get('page_obj').object_list), count
-                    )
+                        len(response.context.get('page_obj').object_list),
+                        count)
