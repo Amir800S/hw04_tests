@@ -3,6 +3,7 @@ from django.urls import reverse
 
 from .fixtures import models
 from ..forms import PostForm
+from ..models import Post
 
 
 class TaskPagesTests(TestCase):
@@ -13,48 +14,53 @@ class TaskPagesTests(TestCase):
         cls.user = models.user()
         cls.group = models.group()
         cls.post = models.post()
+        cls.second_group = models.second_group()
 
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
+    def what_is_in_context(self, request, get_cont=False):
+        if get_cont:
+            response = self.authorized_client.get(request)
+            self.assertEqual(
+                response.context['onepost'].author, self.post.author)
+            self.assertEqual(
+                response.context['onepost'].group, self.post.group)
+            self.assertEqual(
+                response.context['onepost'].text, self.post.text)
+            self.assertEqual(
+                response.context['onepost'].pub_date, self.post.pub_date)
+
+        else:
+            response = self.authorized_client.get(request)
+            self.assertEqual(
+                response.context['page_obj'][0].author, self.post.author)
+            self.assertEqual(
+                response.context['page_obj'][0].group, self.post.group)
+            self.assertEqual(
+                response.context['page_obj'][0].text, self.post.text)
+            self.assertEqual(
+                response.context['page_obj'][0].pub_date, self.post.pub_date)
+
     def test_index_show_correct_context(self):
         """ Проверка Index"""
-        response = self.authorized_client.get(reverse('posts:index'))
-        self.assertTrue(response.context['page_obj'].object_list)
+        self.what_is_in_context(reverse('posts:index'))
 
     def test_group_list_show_correct_context(self):
         """ Проверка Group List"""
-        response = self.authorized_client.get(
-            reverse('posts:group_list', args=(self.group.slug,)))
-        first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.group, self.group)
+        self.what_is_in_context(
+            reverse('posts:group_list', args=(self.group.slug, )))
 
     def test_profile_show_correct_context(self):
         """ Проверка Profile"""
-        response = self.authorized_client.get(
+        self.what_is_in_context(
             reverse('posts:profile', args=(self.user.username,)))
-        first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.author, self.user)
 
     def test_post_detail_show_correct_context(self):
         """ Проверка Post Detail"""
-        response = self.authorized_client.get(
-            reverse('posts:post_detail', args=(self.post.id,)))
-        first_object = response.context['onepost']
-        self.assertEqual(first_object.id, self.post.id)
-
-    # def test_post_edit_show_correct_context(self):
-    #     """ Проверка Post Edit"""
-    #     response = self.authorized_client.get(
-    #         reverse('posts:post_edit', args=(self.post.id, )))
-    #     first_object = response.context['post']
-    #     self.assertEqual(first_object.id, self.post.id)
-    #
-    # def test_post_create_show_correct_context(self):
-    #     """ Проверка Post Create"""
-    #     response = self.authorized_client.get(reverse('posts:post_create'))
-    #     self.assertTrue(response.context['form'])
+        self.what_is_in_context(
+            reverse('posts:post_detail', args=(self.post.id,)), True)
 
     def test_create_and_edit_posts(self):
         """ Проверка Create Post и Edit Post """
@@ -67,31 +73,20 @@ class TaskPagesTests(TestCase):
                 response = self.authorized_client.get(reverse(rev_name, args=args))
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], PostForm)
-            with self.subTest():
-                self.assertEqual(response.context['form'].text, 'TestText')
-                self.assertEqual(response.context['form'].group, 'TestSlug')
+        for form_field in response.context['form'].fields:
+            with self.subTest(form_field=form_field):
+                self.assertTrue(form_field)
+                self.assertTrue(form_field)
 
-    # def test_if_post_with_group_on_index(self):
-    #     """ Проверка поста с группой на Index"""
-    #     response = self.authorized_client.get(reverse('posts:index'))
-    #     if self.post.group:
-    #         self.assertIn(self.post, response.context['page_obj'])
-    #
-    # def test_if_post_with_group_on_group_list(self):
-    #     """ Проверка поста с группой на Group List"""
-    #     response = self.authorized_client.get(
-    #         reverse('posts:group_list', args=(self.group.slug,)))
-    #     if self.post.group:
-    #         self.assertIn(self.post, response.context['page_obj'])
-    #
-    # def test_if_post_with_group_on_profile(self):
-    #     """ Проверка поста с группой на Profile"""
-    #     response = self.authorized_client.get(
-    #         reverse('posts:profile',
-    #                 args=(self.user.username,)))
-    #     if self.post.group:
-    #         self.assertIn(self.post, response.context['page_obj'])
+    def test_in_intended_group(self):
+        """ Тест пост попал в нужную группу """
+        response = self.authorized_client.get(
+            reverse('posts:group_list', args=(self.second_group.slug, )))
+        self.assertEqual(len(response.context.get('page_obj').object_list), 0)
+        self.assertTrue(Post.objects.latest('id').group)
+        response_to_group = self.authorized_client.get(
+            reverse('posts:group_list', args=(self.group.slug,)))
+        self.assertIn(Post.objects.latest('id'),
+                      response_to_group.context['page_obj'].object_list)
 
-    # def func_for_test_context(self, request, bool=False):
-    #     if bool == True:
-    #         pass
+

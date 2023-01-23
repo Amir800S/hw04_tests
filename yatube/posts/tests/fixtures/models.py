@@ -5,7 +5,6 @@ from ...models import Group, Post
 User = get_user_model()
 
 TEST_RANGE = 5  # Число постов на второй странице Paginator
-SKIP_WITHOUT_ARGS = 1  # Пропуск Reverse без аргументов
 FIRST_PAGE = 1  # Первая страница Paginator
 SECOND_PAGE = 2  # Вторая страница Paginator
 
@@ -42,7 +41,7 @@ def post():
     """ Модель Post """
     return Post.objects.create(
         author=User.objects.get(username='TestUser'),
-        text='TestText',
+        text='TestTextTestTextTestTextTestText',
         group=Group.objects.get(slug='TestSlug'),
     )
 
