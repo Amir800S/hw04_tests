@@ -80,4 +80,4 @@ class TaskCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
