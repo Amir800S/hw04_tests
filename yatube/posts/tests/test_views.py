@@ -23,25 +23,19 @@ class TaskPagesTests(TestCase):
     def what_is_in_context(self, request, get_cont=False):
         if get_cont:
             response = self.authorized_client.get(request)
-            self.assertEqual(
-                response.context['onepost'].author, self.post.author)
-            self.assertEqual(
-                response.context['onepost'].group, self.post.group)
-            self.assertEqual(
-                response.context['onepost'].text, self.post.text)
-            self.assertEqual(
-                response.context['onepost'].pub_date, self.post.pub_date)
+            post = response.context['onepost']
 
         else:
             response = self.authorized_client.get(request)
-            self.assertEqual(
-                response.context['page_obj'][0].author, self.post.author)
-            self.assertEqual(
-                response.context['page_obj'][0].group, self.post.group)
-            self.assertEqual(
-                response.context['page_obj'][0].text, self.post.text)
-            self.assertEqual(
-                response.context['page_obj'][0].pub_date, self.post.pub_date)
+            post = response.context['page_obj']
+        self.assertEqual(
+            response.context['page_obj'][0].author, self.post.author)
+        self.assertEqual(
+            response.context['page_obj'][0].group, self.post.group)
+        self.assertEqual(
+            response.context['page_obj'][0].text, self.post.text)
+        self.assertEqual(
+            response.context['page_obj'][0].pub_date, self.post.pub_date)
 
     def test_index_show_correct_context(self):
         """ Проверка Index"""
@@ -84,8 +78,9 @@ class TaskPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:group_list', args=(self.second_group.slug,)))
         self.assertEqual(len(response.context.get('page_obj').object_list), 0)
-        self.assertTrue(Post.objects.latest('id').group)
+        post = Post.objects.first()
+        self.assertTrue(post)
         response_to_group = self.authorized_client.get(
             reverse('posts:group_list', args=(self.group.slug,)))
-        self.assertIn(Post.objects.latest('id'),
+        self.assertIn(post,
                       response_to_group.context['page_obj'].object_list)

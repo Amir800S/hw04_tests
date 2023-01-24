@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from ...models import Group, Post
@@ -48,8 +49,10 @@ def post():
 
 def bulk_post():
     """ Модель Post Bulk Create  """
-    return Post.objects.bulk_create([
-        Post(text='This is a test',
-             author=User.objects.get(username='TestUser'),
-             group=Group.objects.get(slug='TestSlug'))
-    ])
+    return Post.objects.bulk_create(
+        [Post(text='Test',
+              author=User.objects.get(username='TestUser'),
+              group=Group.objects.get(slug='TestSlug')
+              ) for objs in range(
+            TEST_RANGE + settings.POSTS_ON_MAIN)])
+

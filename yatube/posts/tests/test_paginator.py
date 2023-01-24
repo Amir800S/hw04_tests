@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from .fixtures import models
+from ..models import Post
 
 
 class PaginatorViewsTest(TestCase):
@@ -15,16 +16,14 @@ class PaginatorViewsTest(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-
-        for objs in range(settings.POSTS_ON_MAIN + models.TEST_RANGE):
-            models.bulk_post()
+        models.bulk_post()  # Изменения в models
 
     def test_paginator(self):
         """ Проверка Paginator """
         adresses_and_args = (
             ('posts:index', None),
-            ('posts:group_list', (self.group.slug, )),
-            ('posts:profile', (self.user.username, ))
+            ('posts:group_list', (self.group.slug,)),
+            ('posts:profile', (self.user.username,))
         )
         pages_for_test = (
             (models.FIRST_PAGE, settings.POSTS_ON_MAIN),

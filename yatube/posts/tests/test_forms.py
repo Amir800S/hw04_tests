@@ -22,6 +22,7 @@ class TaskCreateFormTests(TestCase):
 
     def test_create_post(self):
         """ Тест отправки формы со страницы Post Create """
+        Post.objects.all().delete()
         post_count = Post.objects.count()
         form_data = {
             'text': 'TestText',
@@ -36,15 +37,17 @@ class TaskCreateFormTests(TestCase):
                              reverse('posts:profile',
                                      args=(self.user.username,)))
 
-        test_post = Post.objects.latest('id')
+        test_post = Post.objects.first()
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertEqual(test_post.text, form_data['text'])
         self.assertEqual(test_post.group.id, form_data['group'])
+        self.assertEqual(test_post.author, self.user)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit(self):
         """ Тест редактирования формы со страницы Post Edit """
         post_count = Post.objects.count()
+        self.assertEqual(Post.objects.count(), 1)
         form_data = {
             'text': 'NewTestText',
             'group': self.second_group.pk,
@@ -58,7 +61,7 @@ class TaskCreateFormTests(TestCase):
                              reverse('posts:post_detail',
                                      args=(self.post.id,)))
 
-        edited_post = Post.objects.latest('id')
+        edited_post = Post.objects.first()
         self.assertEqual(edited_post.author, self.post.author)
         self.assertEqual(edited_post.text, form_data['text'])
         self.assertEqual(edited_post.group.pk, form_data['group'])
@@ -71,13 +74,14 @@ class TaskCreateFormTests(TestCase):
 
     def test_can_not_create_post_guest(self):
         """ Неавторизированный пользователь не может создать пост"""
+        post_count = Post.objects.count()
         form_data = {
             'text': 'Test',
             'group': self.group.pk,
         }
-        response = self.client.post(
+        self.client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Post.objects.count(), post_count)

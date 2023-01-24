@@ -35,13 +35,17 @@ class TaskURLTests(TestCase):
              f'/posts/{self.post.id}/edit/'),
             ('posts:post_create', None, '/create/')
         )
+        # Проверка Reverse
+        for name, args, url in test_urls_with_reverse:
+            with self.subTest(name=name, args=args, url=url):
+                self.assertEqual(reverse(name, args=args), url)
+
         # Авторизированный автор
         for name, args, url in test_urls_with_reverse:
             with self.subTest(name=name, args=args, url=url):
                 response = self.authorized_client.get(
                     reverse(name, args=args))
                 self.assertTrue(response.status_code, HTTPStatus.OK)
-                self.assertEqual(reverse(name, args=args), url)
 
         # Авторизированный не автор
         for name, args, url in test_urls_with_reverse:
@@ -49,7 +53,8 @@ class TaskURLTests(TestCase):
                 response = self.second_authorized_client.get(
                     reverse(name, args=args))
                 if name == 'posts:post_edit':
-                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                    self.assertRedirects(response,
+                                         reverse('posts:post_detail', args=args))
                 else:
                     self.assertTrue(response.status_code, HTTPStatus.OK)
 
@@ -74,7 +79,6 @@ class TaskURLTests(TestCase):
             ('posts:post_edit', (self.post.id,), 'posts/create_post.html'),
             ('posts:post_create', None, 'posts/create_post.html')
         )
-
         for rev_name, args, template in templates_check:
             with self.subTest(
                     rev_name=rev_name,
