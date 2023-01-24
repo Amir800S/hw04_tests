@@ -60,7 +60,7 @@ class TaskURLTests(TestCase):
 
         # Неавторизированный
         for name, args, url in test_urls_with_reverse:
-            with self.subTest(name=name, args=args, url=url):
+            with self.subTest(name=name):
                 response = self.client.get(reverse(name, args=args))
                 if name == 'posts:post_edit':
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)

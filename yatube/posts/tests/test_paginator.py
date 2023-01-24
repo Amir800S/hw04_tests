@@ -16,7 +16,7 @@ class PaginatorViewsTest(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        models.bulk_post()  # Изменения в models
+        models.bulk_post()  # Изменения в fixtures/models.py
 
     def test_paginator(self):
         """ Проверка Paginator """
