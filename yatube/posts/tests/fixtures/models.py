@@ -55,4 +55,3 @@ def bulk_post():
               group=Group.objects.get(slug='TestSlug')
               ) for objs in range(
             TEST_RANGE + settings.POSTS_ON_MAIN)])
-

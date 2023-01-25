@@ -3,7 +3,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from .fixtures import models
-from ..models import Post
 
 
 class PaginatorViewsTest(TestCase):

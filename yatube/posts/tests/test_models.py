@@ -1,7 +1,6 @@
 from django.test import TestCase
 
 from .fixtures import models
-from ..models import Post
 
 
 class PostModelTest(TestCase):
@@ -37,12 +36,12 @@ class PostModelTest(TestCase):
 
     def test_verbose_names_group(self):
         """ Проверка verbose Group"""
-        fields = {
-            'title': 'Название группы',
-            'slug': 'URL адрес',
-            'description': 'Описание группы',
-        }
-        for verbose_field, desc in fields.items():
+        fields = (
+            ('title', 'Название группы'),
+            ('slug', 'URL адрес'),
+            ('description', 'Описание группы'),
+        )
+        for verbose_field, desc in fields:
             with self.subTest(verbose_field=verbose_field):
                 self.assertEqual(
                     self.group._meta.get_field(
@@ -51,22 +50,22 @@ class PostModelTest(TestCase):
 
     def test_help_texts_post(self):
         """ Проверка help_text Post"""
-        fields = {
-            'text': 'Напишите что нибудь...',
-            'group': 'Группа поста',
-        }
-        for fields, desc in fields.items():
+        fields = (
+            ('text', 'Напишите что нибудь...'),
+            ('group', 'Группа поста')
+        )
+        for fields, desc in fields:
             with self.subTest(fields=fields):
                 self.assertEqual(
                     self.post._meta.get_field(fields).help_text, desc)
 
     def test_help_texts_group(self):
         """ Проверка help_text Group"""
-        fields = {
-            'title': 'Дайте название группе',
-            'description': 'Описание для группы',
-        }
-        for fields, desc in fields.items():
+        fields = (
+            ('title', 'Дайте название группе'),
+            ('description', 'Описание для группы')
+        )
+        for fields, desc in fields:
             with self.subTest(fields=fields):
                 self.assertEqual(
                     self.group._meta.get_field(fields).help_text, desc)

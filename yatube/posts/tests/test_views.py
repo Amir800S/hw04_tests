@@ -38,21 +38,17 @@ class TaskPagesTests(TestCase):
         self.assertEqual(
             post.pub_date, self.post.pub_date)
 
-    def test_index_show_correct_context(self):
-        """ Проверка Index"""
-        self.what_is_in_context('posts:index', None)
-
-    def test_group_list_show_correct_context(self):
-        """ Проверка Group List"""
-        self.what_is_in_context('posts:group_list', (self.group.slug,))
-
-    def test_profile_show_correct_context(self):
-        """ Проверка Profile"""
-        self.what_is_in_context('posts:profile', (self.user.username,))
-
-    def test_post_detail_show_correct_context(self):
-        """ Проверка Post Detail"""
-        self.what_is_in_context('posts:post_detail', (self.post.id,), True)
+    def test_views_have_correct_context(self):
+        """ Проверка контекста всех View"""
+        all_views = (
+            ('posts:index', None, False),
+            ('posts:group_list', (self.group.slug,), False),
+            ('posts:profile', (self.user.username,), False),
+            ('posts:post_detail', (self.post.id,), True)
+        )
+        for view_name, args, get_cont in all_views:
+            with self.subTest(view_name=view_name):
+                self.what_is_in_context(view_name, args, get_cont)
 
     def test_create_and_edit_posts(self):
         """ Проверка Create Post и Edit Post """

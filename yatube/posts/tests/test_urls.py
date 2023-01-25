@@ -25,7 +25,7 @@ class TaskURLTests(TestCase):
         """ Проверка Reverese == URL-адресу"""
         test_urls_with_reverse = (
             ('posts:index', None, '/'),
-            ('posts:group_list', (self.group.slug, ),
+            ('posts:group_list', (self.group.slug,),
              f'/group/{self.group.slug}/'),
             ('posts:profile', (self.user.username,),
              f'/profile/{self.user.username}/'),
@@ -37,35 +37,42 @@ class TaskURLTests(TestCase):
         )
         # Проверка Reverse
         for name, args, url in test_urls_with_reverse:
-            with self.subTest(name=name, args=args, url=url):
+            with self.subTest(name=name):
                 self.assertEqual(reverse(name, args=args), url)
 
         # Авторизированный автор
         for name, args, url in test_urls_with_reverse:
-            with self.subTest(name=name, args=args, url=url):
+            with self.subTest(name=name):
                 response = self.authorized_client.get(
                     reverse(name, args=args))
                 self.assertTrue(response.status_code, HTTPStatus.OK)
 
         # Авторизированный не автор
         for name, args, url in test_urls_with_reverse:
-            with self.subTest(name=name, args=args, url=url):
+            with self.subTest(name=name):
                 response = self.second_authorized_client.get(
                     reverse(name, args=args))
                 if name == 'posts:post_edit':
-                    self.assertRedirects(response,
-                                         reverse('posts:post_detail', args=args))
+                    self.assertRedirects(
+                        response, reverse('posts:post_detail', args=args))
                 else:
                     self.assertTrue(response.status_code, HTTPStatus.OK)
+
+        revs_with_redirect = [
+            'posts:post_edit',
+            'posts:post_create',
+        ]  # Список для теста
 
         # Неавторизированный
         for name, args, url in test_urls_with_reverse:
             with self.subTest(name=name):
                 response = self.client.get(reverse(name, args=args))
-                if name == 'posts:post_edit':
-                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
-                elif name == 'posts:post_create':
-                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                login_rev = reverse('users:login')
+                name_rev = reverse(name, args=args)
+                if name in revs_with_redirect:
+                    self.assertRedirects(
+                        response, f'{login_rev}?next={name_rev}'
+                    )
                 else:
                     self.assertEqual(response.status_code, HTTPStatus.OK)
 

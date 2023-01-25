@@ -3,7 +3,8 @@ from http import HTTPStatus
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Post
+from ..forms import PostForm
+from ..models import Post, User
 from .fixtures import models
 
 
@@ -15,6 +16,7 @@ class TaskCreateFormTests(TestCase):
         cls.group = models.group()
         cls.second_group = models.second_group()
         cls.post = models.post()
+        cls.form = PostForm()
 
     def setUp(self):
         self.authorized_client = Client()
@@ -36,7 +38,6 @@ class TaskCreateFormTests(TestCase):
         self.assertRedirects(response,
                              reverse('posts:profile',
                                      args=(self.user.username,)))
-
         test_post = Post.objects.first()
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertEqual(test_post.text, form_data['text'])
@@ -85,3 +86,44 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(Post.objects.count(), post_count)
+
+    def test_title_label(self):
+        """ Тест labels PostForm"""
+        labels_fields = (
+            ('text', 'Введите текст'),
+            ('group', 'Выберите группу'),
+        )
+        for label_field, desc in labels_fields:
+            with self.subTest(label_field=label_field):
+                self.assertEqual(
+                    self.form.fields[label_field].label,
+                    desc
+                )
+
+    def test_title_help_text(self):
+        """ Тест help_text PostForm"""
+        help_text_fields = (
+            ('text', 'Текст поста'),
+            ('group', 'Название группы'),
+        )
+        for help_text_field, desc in help_text_fields:
+            with self.subTest(help_text_field=help_text_field):
+                self.assertEqual(
+                    self.form.fields[help_text_field].help_text,
+                    desc
+                )
+
+    def test_user_created_after_signup(self):
+        """ Новый User создался через форму на SignUp"""
+        users_count = User.objects.count()
+        self.client.post(
+            reverse('users:signup'),
+            data={
+                'username': 'UserNameForTest',
+                'email': 'testuser123@email.com',
+                'password1': 'PaSSword123123',
+                'password2': 'PaSSword123123'
+            },
+            follow=True
+        )
+        self.assertEqual(User.objects.count(), users_count + 1)
