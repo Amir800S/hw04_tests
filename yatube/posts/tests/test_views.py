@@ -38,17 +38,35 @@ class TaskPagesTests(TestCase):
         self.assertEqual(
             post.pub_date, self.post.pub_date)
 
-    def test_views_have_correct_context(self):
-        """ Проверка контекста всех View"""
-        all_views = (
-            ('posts:index', None, False),
-            ('posts:group_list', (self.group.slug,), False),
-            ('posts:profile', (self.user.username,), False),
-            ('posts:post_detail', (self.post.id,), True)
-        )
-        for view_name, args, get_cont in all_views:
-            with self.subTest(view_name=view_name):
-                self.what_is_in_context(view_name, args, get_cont)
+    def test_index_show_correct_context(self):
+        """ Проверка Index"""
+        self.what_is_in_context('posts:index', None)
+
+    def test_group_list_show_correct_context(self):
+        """ Проверка Group List"""
+        self.what_is_in_context('posts:group_list', (self.group.slug,))
+        # Проверка доп.контекста 'group'
+        response = self.authorized_client.get(
+            reverse('posts:group_list', args=(self.group.slug,)))
+        group = response.context['group']
+        self.assertEqual(self.group, group)
+
+    def test_profile_show_correct_context(self):
+        """ Проверка Profile"""
+        self.what_is_in_context('posts:profile', (self.user.username,))
+        # Проверка доп.контекста 'usermodel', 'post_list'
+        response = self.authorized_client.get(
+            reverse('posts:profile', args=(self.user.username,)))
+        usermodel = response.context['usermodel']
+        self.assertEqual(self.user, usermodel)
+        # Проверка количества постов пользователя
+        post_list = response.context['post_list']
+        self.assertEqual(
+            post_list.count(), Post.objects.filter(author=self.user).count())
+
+    def test_post_detail_show_correct_context(self):
+        """ Проверка Post Detail"""
+        self.what_is_in_context('posts:post_detail', (self.post.id,), True)
 
     def test_create_and_edit_posts(self):
         """ Проверка Create Post и Edit Post """
@@ -61,18 +79,14 @@ class TaskPagesTests(TestCase):
                 response = self.authorized_client.get(
                     reverse(rev_name, args=args))
                 self.assertIn('form', response.context)
-                self.assertIsInstance(response.context['form'], PostForm)
-                check_form_fields = (
-                    ('text', forms.fields.CharField),
-                    ('group', forms.fields.ChoiceField)
+                self.assertIsInstance(
+                    response.context['form'],
+                    PostForm
                 )
-                for field, field_type in check_form_fields:
-                    with self.subTest(field=field):
-                        form_field = response.context.get(
-                            'form').fields.get(field)
-                        self.assertIsInstance(
-                            form_field, field_type
-                        )
+                self.assertIsInstance(response.context.get(
+                    'form').fields.get('text'), forms.fields.CharField)
+                self.assertIsInstance(response.context.get(
+                    'form').fields.get('group'), forms.fields.ChoiceField)
 
     def test_in_intended_group(self):
         """ Тест пост попал в нужную группу """

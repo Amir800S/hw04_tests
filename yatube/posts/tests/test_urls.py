@@ -21,9 +21,7 @@ class TaskURLTests(TestCase):
         self.authorized_client.force_login(self.user)
         self.second_authorized_client.force_login(self.second_user)
 
-    def test_urls_with_reverse(self):
-        """ Проверка Reverese == URL-адресу"""
-        test_urls_with_reverse = (
+        self.test_urls_with_reverse = (
             ('posts:index', None, '/'),
             ('posts:group_list', (self.group.slug,),
              f'/group/{self.group.slug}/'),
@@ -34,21 +32,25 @@ class TaskURLTests(TestCase):
             ('posts:post_edit', (self.post.id,),
              f'/posts/{self.post.id}/edit/'),
             ('posts:post_create', None, '/create/')
-        )
-        # Проверка Reverse
-        for name, args, url in test_urls_with_reverse:
+        )  # Кортеж Test URls
+
+    def test_urls_with_reverse(self):
+        """ Проверка Reverse == URL-адресу"""
+        for name, args, url in self.test_urls_with_reverse:
             with self.subTest(name=name):
                 self.assertEqual(reverse(name, args=args), url)
 
-        # Авторизированный автор
-        for name, args, url in test_urls_with_reverse:
+    def test_authorized_author_of_post(self):
+        """ Страницы доступные Авторизированному автору """
+        for name, args, url in self.test_urls_with_reverse:
             with self.subTest(name=name):
                 response = self.authorized_client.get(
                     reverse(name, args=args))
                 self.assertTrue(response.status_code, HTTPStatus.OK)
 
-        # Авторизированный не автор
-        for name, args, url in test_urls_with_reverse:
+    def test_authorized_not_author(self):
+        """ Страницы доступные Авторизированному не автору"""
+        for name, args, url in self.test_urls_with_reverse:
             with self.subTest(name=name):
                 response = self.second_authorized_client.get(
                     reverse(name, args=args))
@@ -58,13 +60,13 @@ class TaskURLTests(TestCase):
                 else:
                     self.assertTrue(response.status_code, HTTPStatus.OK)
 
+    def test_not_authorized_not_author(self):
+        """ Страницы недоступные Неавторизированному пользователю"""
         revs_with_redirect = [
             'posts:post_edit',
             'posts:post_create',
         ]  # Список для теста
-
-        # Неавторизированный
-        for name, args, url in test_urls_with_reverse:
+        for name, args, url in self.test_urls_with_reverse:
             with self.subTest(name=name):
                 response = self.client.get(reverse(name, args=args))
                 login_rev = reverse('users:login')
