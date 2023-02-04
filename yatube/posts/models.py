@@ -31,12 +31,17 @@ class Post(models.Model):
                                     auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='posts',
-                               verbose_name='Автор',)
+                               verbose_name='Автор', )
     group = models.ForeignKey(Group, blank=True, null=True,
                               on_delete=models.SET_NULL,
                               related_name='posts',
                               verbose_name='Группа',
                               help_text='Группа поста')
+    image = models.ImageField('Картинка',
+                              upload_to='posts/',
+                              blank=True,
+                              null=True
+                              )
 
     class Meta:
         """ Metaclass Post """
@@ -45,3 +50,44 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text[0:15]
+
+
+class Comment(models.Model):
+    """ ORM модель комментариев """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,
+                             related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               related_name='comments',
+                               verbose_name='Автор')
+    text = models.TextField('Текст комментария',
+                            max_length=10000,
+                            help_text='Напишите что нибудь...')
+    pub_date = models.DateTimeField('Дата публикации',
+                                    auto_now_add=True)
+
+    class Meta:
+        """ Metaclass Comment """
+        ordering = ['-pub_date']
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return 'Comment by {}'.format(self.author)
+
+
+# class FollowSystem(models.Model):
+#     """ ORM Following модель """
+#     followers = models.ForeignKey(
+#         User,
+#         related_name='followers',
+#         on_delete=models.CASCADE
+#     )
+#     blogger = models.ForeignKey(
+#         User,
+#         related_name='blogger',
+#         on_delete=models.CASCADE
+#     )
+#
+#     class Meta:
+#         ordering = ('-author',)
+#         verbose_name = 'Лента автора'
+

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Group, Post
+from .models import Comment, Group, Post
 
 
 class PostAdmin(admin.ModelAdmin):  # Администрирование постов
@@ -26,5 +26,21 @@ class GroupAdmin(admin.ModelAdmin):  # Администрирование гру
     list_filter = ('title',)  # Фильтрация по заголовку
 
 
+class CommentAdmin(admin.ModelAdmin):  # Администирование Комментариев
+    list_display = (
+        'author',
+        'text',
+        'post',
+        'pub_date'
+    )  # Отображаемые поля комментариев
+    list_filter = ('pub_date',)  # Фильтрация по дате публикации
+    search_fields = (
+        'author',
+        'text',
+        'pub_date'
+    )  # Поиск по автору, тексту и дате публикации
+
+
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Group, GroupAdmin)

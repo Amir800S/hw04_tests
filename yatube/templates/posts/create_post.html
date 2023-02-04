@@ -1,7 +1,6 @@
-<!-- Страница создания и редактирования постов-->
 {% extends "base.html" %}
 {% block title %}
-  <!-- Проверка наличия у поста id -->
+   {% comment %} Проверка наличия у поста id  {% endcomment %}
   {% if form.instance.id %} Редактировать пост {% else %} Новый пост {% endif %}
 {% endblock%}
 {% block content %}
@@ -10,21 +9,21 @@
       <div class="col-md-8 p-5">
         <div class="card">
           <div class="card-header">
-            <!-- Проверка наличия у поста id -->
+             {% comment %} Проверка наличия у поста id  {% endcomment %}
             {% if form.instance.id %} Редактировать пост {% else %} Новый пост {% endif %}
           </div>
           <div class="card-body">
             {% include 'includes/error_form.html' %}
             {% if form.instance.id %}
-              <form method="POST" action="{% url 'posts:post_edit' form.instance.id %}">
+              <form method="POST" enctype="multipart/form-data" action="{% url 'posts:post_edit' form.instance.id %}">
             {% else %}
-              <form method="POST" action="{% url 'posts:post_create' %}">
+              <form method="POST" enctype="multipart/form-data" action="{% url 'posts:post_create' %}">
             {% endif %}
               {% csrf_token %}
               {% include 'includes/form.html' %}
                 <div class="d-flex justify-content-end">
                   <button type="submit" value="Submit" class="btn btn-primary">
-                    <!-- Проверка наличия у поста id -->
+                     {% comment %} Проверка наличия у поста id  {% endcomment %}
                     {% if form.instance.id %} Добавить {% else %} Сохранить {% endif %}
                   </button>
                 </div>
